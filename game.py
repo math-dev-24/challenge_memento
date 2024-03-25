@@ -26,18 +26,24 @@ class Game:
 
     def init(self):
         cprint(" Jeu de pair ", attrs=[Format.BOLD, Color.BG_MAGENTA])
-        self.msg_info("Que souhaitez vous faire ?")
-        cprint("1. Reprendre une partie sauvegardé", attrs=[Format.BOLD, Color.CYAN])
-        cprint("2. Nouvelle partie", attrs=[Format.BOLD, Color.MAGENTA])
         is_n_ok = True
         while is_n_ok:
+            print("\n")
+            self.msg_info("Que souhaitez vous faire ?")
+            cprint("1. Reprendre une partie sauvegardé", attrs=[Format.BOLD, Color.CYAN])
+            cprint("2. Nouvelle partie", attrs=[Format.BOLD, Color.MAGENTA])
             value = input("> ")
             try:
                 number = int(value)
                 if 3 > number > 0:
                     is_n_ok = False
                     if number == 1:
-                        print(self.db.get_all_game())
+                        game = self.db.get_all_game()
+                        if len(game) > 0:
+                            print(self.db.get_all_game())
+                        else:
+                            self.msg_info("Aucun jeu disponible")
+                            is_n_ok = True
                     elif number == 2:
                         self.init_game()
                     else:
