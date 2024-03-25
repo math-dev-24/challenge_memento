@@ -11,6 +11,7 @@ class Game:
         self.level: int = 0
         self.history = []
         self.db = DbModel()
+        self.name = ""
 
     @staticmethod
     def msg_warning(text: str):
@@ -45,6 +46,7 @@ class Game:
                             self.msg_info("Aucun jeu disponible")
                             is_n_ok = True
                     elif number == 2:
+                        self.name = input('Nom de la partie  > ')
                         self.init_game()
                     else:
                         self.msg_info(f"Numéros {number} n'est pas 1 ou 2")
@@ -63,6 +65,7 @@ class Game:
                 self.level = int(choice)
                 if q_level >= self.level > 0:
                     choice_level = True
+                    self.msg_ok(f"Partie : nom -> {self.name} et niveau {self.level}")
                 else:
                     print('\n' * 20)
                     self.msg_info(f"Le niveau doit être compris entre 1 et {q_level}")
