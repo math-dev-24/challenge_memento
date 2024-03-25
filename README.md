@@ -32,7 +32,7 @@ __À chaque niveau, une taille de grille spécifique :__
 
 ## Réfléxion personnel :
 
-![Exemple logique](./assets/exemple.png)
+![Exemple logique](./assets/game_logical.png)
 
 ## Fichier de configuration
 
