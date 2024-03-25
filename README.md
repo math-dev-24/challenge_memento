@@ -30,6 +30,9 @@ __À chaque niveau, une taille de grille spécifique :__
 - niveau 3 : 8 x 8
 - niveau 4 : 10 x 10
 
+## Réfléxion personnel :
+
+![Exemple logique](./assets/exemple.png)
 
 ## Fichier de configuration
 

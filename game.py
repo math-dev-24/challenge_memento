@@ -1,10 +1,14 @@
-from term_printer import Color, Format, cprint, StdText
+from term_printer import Color, Format, cprint
+from models.GameModel import GameModel
+from models.blockModel import BlockModel
+import uuid
 
 
 class Game:
     def __init__(self, config):
         self.config = config
         self.level: int = 0
+        self.history = []
 
     @staticmethod
     def msg_warning(text: str):
@@ -31,7 +35,7 @@ class Game:
                 self.level = int(choice)
                 if q_level >= self.level > 0:
                     choice_level = True
-                    # test
+                    # test msg
                     self.msg_ok("C'est partie !")
                     self.msg_info("Pour information")
                 else:
@@ -39,4 +43,15 @@ class Game:
                     self.msg_warning(f"Le niveau doit être compris entre 1 et {q_level}")
             except:
                 print('\n' * 20)
-                self.msg_warning('Doit être un nombre !')
+                self.msg_warning('le niveau doit être un nombre !')
+
+    def create_snap(self):
+        game_id = str(uuid.uuid4())
+        game = GameModel(game_id)
+        # générer le nombre de bloc nécessaire
+        # prendre en compte position X et Y ?
+        self.history.append(game_id)
+
+    def print_grid(self):
+
+        print("Generate grid")

@@ -1,9 +1,6 @@
 import yaml
-import uuid
 from game import Game
 from models.db import DbModel
-from models.GameModel import GameModel
-from models.blockModel import BlockModel
 
 with open("config.yaml", "r", encoding='utf-8') as f:
     CONFIG = yaml.load(f, Loader=yaml.FullLoader)
