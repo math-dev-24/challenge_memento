@@ -1,16 +1,17 @@
 from tinydb import TinyDB, Query
+import os
 
 
-class DB:
+class DbModel(object):
     def __init__(self):
-        self.instance = TinyDB('../db.json')
-        self.block_table = self.instance.table('block')
-        self.game_table = self.instance.table('game')
+        self.db_path = os.path.join("./db.json")
+        self.instance = TinyDB(self.db_path)
 
-    def get_game(self, game_id: int):
-        game = Query()
-        return self.game_table.search(game.id == game_id)
+    def get_game(self, id_game: str):
+        return self.instance.table('game').search(Query().id == id_game)
 
-    def get_block(self, game_id: int):
-        game = Query()
-        return self.block_table.search(game.id == game_id)
+    def get_block(self, id_game: str):
+        return self.instance.table('block').search(Query().game_id == id_game)
+
+    def get_all_game(self):
+        return self.instance.table('game').all()

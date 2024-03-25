@@ -1,18 +1,15 @@
-from db import DB
+from models.db import DbModel
 
 
-class BlockModel(DB):
-    def __init__(self, content: str, state: bool, game_id: int):
+class BlockModel(DbModel):
+    def __init__(self, content: str, state: bool, game_id: str):
         super().__init__()
         self.content: str = content
         self.state: bool = state
-        self.game_id: int = game_id
-
-    def __repr__(self):
-        return f"Block(content='{self.content}', state='{self.state}'"
+        self.game_id: str = game_id
 
     def __str__(self):
-        return f"Block(content='{self.content}', state='{self.state}'"
+        return f"Block(content='{self.content}', state='{self.state}')"
 
     def get_game_with_block(self):
         super().get_game(self.game_id)
