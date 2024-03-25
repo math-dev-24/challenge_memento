@@ -1,6 +1,7 @@
 from term_printer import Color, Format, cprint
 from models.GameModel import GameModel
 from models.blockModel import BlockModel
+from models.db import DbModel
 import uuid
 
 
@@ -9,6 +10,7 @@ class Game:
         self.config = config
         self.level: int = 0
         self.history = []
+        self.db = DbModel()
 
     @staticmethod
     def msg_warning(text: str):
@@ -22,36 +24,42 @@ class Game:
     def msg_info(text: str):
         cprint(f'ℹ️ - {text} ', attrs=[Color.BRIGHT_BLUE])
 
+    def init(self):
+        cprint(" Jeu de pair ", attrs=[Format.BOLD, Color.BG_MAGENTA])
+        self.msg_info("Que souhaitez vous faire ?")
+        cprint("1. Reprendre une partie sauvegardé", attrs=[Format.BOLD, Color.CYAN])
+        cprint("2. Nouvelle partie", attrs=[Format.BOLD, Color.MAGENTA])
+        is_n_ok = True
+        while is_n_ok:
+            value = input("> ")
+            try:
+                number = int(value)
+                if 3 > number > 0:
+                    is_n_ok = False
+                    if number == 1:
+                        print(self.db.get_all_game())
+                    elif number == 2:
+                        self.init_game()
+                    else:
+                        self.msg_info(f"Numéros {number} n'est pas 1 ou 2")
+            except:
+                self.msg_warning("Doit être un nombre !")
+
     def init_game(self):
         choice_level: bool = False
         q_level: int = len(self.config['level'])
-        cprint(" Jeu de pair ", attrs=[Format.BOLD, Color.BG_MAGENTA])
         while not choice_level:
             cprint('Niveaux disponibles :', attrs=[Format.UNDERLINE, Format.BOLD, Color.MAGENTA])
             for index, grid in enumerate(self.config['level']):
                 cprint(f"Niveau {index + 1} : {grid} x {grid}", attrs=[Color.BRIGHT_GREEN])
-            choice = input(f"Choix du niveau > ")
+            choice = input(f"> ")
             try:
                 self.level = int(choice)
                 if q_level >= self.level > 0:
                     choice_level = True
-                    # test msg
-                    self.msg_ok("C'est partie !")
-                    self.msg_info("Pour information")
                 else:
                     print('\n' * 20)
-                    self.msg_warning(f"Le niveau doit être compris entre 1 et {q_level}")
+                    self.msg_info(f"Le niveau doit être compris entre 1 et {q_level}")
             except:
                 print('\n' * 20)
                 self.msg_warning('le niveau doit être un nombre !')
-
-    def create_snap(self):
-        game_id = str(uuid.uuid4())
-        game = GameModel(game_id)
-        # générer le nombre de bloc nécessaire
-        # prendre en compte position X et Y ?
-        self.history.append(game_id)
-
-    def print_grid(self):
-
-        print("Generate grid")
