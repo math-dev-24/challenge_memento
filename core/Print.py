@@ -21,8 +21,12 @@ class Message:
 
     @staticmethod
     def question(text: str):
-        cprint(f'{text} ', attrs=[Color.MAGENTA])
+        cprint(f'{text} ', attrs=[Color.MAGENTA, Format.UNDERLINE])
 
     @staticmethod
     def msg(text: str):
         print(text)
+
+    @staticmethod
+    def input():
+        return input('🎤️ > ')

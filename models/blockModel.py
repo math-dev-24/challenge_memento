@@ -11,7 +11,7 @@ class BlockModel(DbModel):
         self.is_visible: bool = is_visible
 
     def __str__(self):
-        return f"Block(content='{self.content}', is_visible='{self.is_visible}')"
+        return f"Block(content='{self.content}', is_visible='{self.is_visible}', x='{self.x}', y='{self.y}')"
 
     def get_game_with_block(self):
         super().get_game(self.game_id)
@@ -24,7 +24,9 @@ class BlockModel(DbModel):
 
     def get_json(self):
         return {
+            'game_id': self.game_id,
             'content': self.content,
             'is_visible': self.is_visible,
-            'game_id': self.game_id
+            'x': self.x,
+            'y': self.y
         }
