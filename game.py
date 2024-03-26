@@ -4,6 +4,7 @@ from models.GameModel import GameModel
 from models.blockModel import BlockModel
 from models.db import DbModel
 import uuid
+import random
 
 
 class Game:
@@ -72,10 +73,16 @@ class Game:
                 Message.warning('le niveau doit être un nombre !')
 
     def init_grid(self):
+        q_emoji = int((self.grid_size * self.grid_size) / 2)
+        random.shuffle(self.config['recto'])
+        emoji = self.config['recto'][:q_emoji]
+
         for x in range(self.grid_size):
             for y in range(self.grid_size):
                 block = BlockModel('X', False, self.game_id, x + 1, y + 1)
                 self.blocks.append(block)
+        print(q_emoji)
+        print(emoji)
 
     def print_grid(self):
         print(f"{self.grid_size} x {self.grid_size}")
