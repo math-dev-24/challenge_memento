@@ -3,7 +3,6 @@
 ## Principe du jeu : 
 A chaque tour, l'utilisateur doit entrer les coordonnées (exemple A1 ou C7) pour révéler une carte, puis en entrer une autre afin te trouver la bonne paire, si les cartes sont identiques elles restent visibles sinon elles se retournent et le jeu continue.
 
-
 ## Étapes :
 - Créer une grille avec les repérages en lignes / colonnes pour les coordonnées.
 - Créer une structure de données pour le jeu.
@@ -30,10 +29,6 @@ __À chaque niveau, une taille de grille spécifique :__
 - niveau 3 : 8 x 8
 - niveau 4 : 10 x 10
 
-## Réfléxion personnel :
-
-![Exemple logique](./assets/game_logical.png)
-
 ## Fichier de configuration
 
 ### Consigne :
@@ -42,22 +37,24 @@ Le fichier comprend les informations suivantes:
 - recto : symboles pour la face visible des cartes
 - verso : symbole du dos des cartes
 
-### Exemple :
-```yaml
-niveau: [2, 4, 6, 8, 10]
+## Réfléxion personnel :
 
-recto: [" 😯", " 😀", " 😁", " 🤣", " 😉",
-        " 😎", " 😍", " 🤗", " 🤩", " 😑",
-        " 🙄", " 😣", " 😏", " 😮", " 🤐",
-        " 😫", " 😴", " 😛", " 🤤", " 😓",
-        " 🙃", " 🤑", " 🥵", " 🥶", " 😤",
-        " 😭", " 🥳", " 😨", " 🤯", " 😱",
-        " 🤪", " 😵", " 😡", " 🥺", " 😷",
-        " 🤕", " 🤢", " 🤮", " 😇", " 🤠",
-        " 🤥", " 🧐", " 😈", " 🤡", " 👻",
-        " 🤘", " 🐍", " 🦆", " 🦁", " 🎮"]
+### Schéma
+![Exemple logique](./assets/game_logical.png)
 
-verso: " ❓"
-```
+### Todo
+- [X] Logique du jeu
+  - [x] Initialisation du jeu
+  - [x] Génération d'une grille aléatoire
+  - [x] Console design de la grille
+  - [x] gestion d'erreur des coordonnées
+  - [x] gestion d'erreur bloc disponible ?
+  - ...
+- [ ] Sauvegarde
+  - [ ] Enregistrement
+    - [X] Première enregistrement
+    - [ ] Re engistrement
+  - [X] Récupération d'une partie sauvegardée
+
 
 
