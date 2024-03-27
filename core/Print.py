@@ -28,5 +28,8 @@ class Message:
         print(text)
 
     @staticmethod
+    def win(text: str):
+        cprint(f"{text}", attrs=[Color.BG_GREEN, Format.BOLD])
+    @staticmethod
     def input():
         return input('🎤️ > ')

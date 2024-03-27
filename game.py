@@ -15,7 +15,7 @@ class Game:
         self.db = DbModel()
         self.game_id: str = str(uuid.uuid4())
         self.blocks = []
-        self.gameModel = ""
+        self.gameModel = None
         self.grid_size: int = 0
         self.y_list = []
 
@@ -126,7 +126,12 @@ class Game:
                                 for block in self.blocks:
                                     if block.content == block_1.content:
                                         block.is_visible = True
-                                self.print_grid()
+                                if self.check_win():
+                                    Message.win("Vous avez gagné !")
+                                    print("\n" * 2)
+                                    self.reset_game()
+                                else:
+                                    self.print_grid()
                                 break
                             else:
                                 Message.info("Non identique")
@@ -166,6 +171,19 @@ class Game:
     def generate_alphabet(n: int):
         alphabet = string.ascii_uppercase
         return [alphabet[i % 26] for i in range(n)]
+
+    def check_win(self):
+        win = False
+        rest_block = [block for block in self.blocks if not block.is_visible]
+        quantity_rest = len(rest_block)
+        return  quantity_rest == 0
+
+    def reset_game(self):
+        self.name = ""
+        self.game_id = str(uuid.uuid4())
+        self.blocks = []
+        self.y_list = []
+        self.init()
 
     def get_game_model(self):
         return GameModel(self.game_id, self.name, self.grid_size)
