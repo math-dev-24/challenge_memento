@@ -45,7 +45,6 @@ class Game:
                             while True:
                                 Message.question("Choix de la partie à reprendre :")
                                 choice_game = Message.input()
-                                print(game_save, choice_game)
                                 if choice_game.isdigit() and 0 < int(choice_game) <= game_save:
                                     game_select = games[int(choice_game) - 1]
                                     self.game_id = game_select['id']
