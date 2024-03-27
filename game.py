@@ -14,12 +14,13 @@ class Game:
         self.config = config
         self.db = DbModel()
         self.game_id: str = str(uuid.uuid4())
-        self.blocks = []
+        self.blocks = {}
         self.gameModel = None
         self.grid_size: int = 0
         self.y_list = []
 
     def init(self):
+        print('\n')
         Message.title(" Jeu de pair ")
         is_n_ok = True
         while is_n_ok:
@@ -27,15 +28,16 @@ class Game:
             Message.question("Que souhaitez vous faire ?")
             Message.msg("1 - Reprendre une partie sauvegardé")
             Message.msg("2 - Nouvelle partie")
+            Message.msg("3 - Quitter")
             value = Message.input()
 
             if value.isdigit():
                 number = int(value)
-                if 3 > number > 0:
+                if 4 > number > 0:
                     is_n_ok = False
                     if number == 1:
                         game = self.db.get_all_game()
-                        if len(game) > 0:
+                        if game:
                             print(self.db.get_all_game())
                         else:
                             Message.info("Aucune(s) sauvegarde(s) disponible(s)")
@@ -44,6 +46,10 @@ class Game:
                         Message.question("Nom de la partie ?")
                         self.name = Message.input().strip()
                         self.init_game()
+                    else:
+                        Message.info("Fermeture du jeu")
+                        Message.info("Bonne journée !")
+                        exit()
                 else:
                     Message.warning(f"Choix {number}, n'est pas 1 ou 2")
             else:
@@ -88,62 +94,60 @@ class Game:
                 emoji_item = random.choice(available_emojis)
                 current_emoji = emoji_item['content']
                 emoji_item['available'] -= 1
-                block = BlockModel(current_emoji, False, self.game_id, x + 1, self.y_list[y])
-                self.blocks.append(block)
+                block_key = f"{x+1}-{self.y_list[y]}"
+                self.blocks[block_key] = BlockModel(current_emoji, False, self.game_id, x + 1, self.y_list[y])
+        self.game()
+
+    def game(self):
         self.print_grid()
+        while True:
+            value_1 = self.question_coordinate()
+            if not value_1['valid']:
+                Message.warning("Coordonnée non valide")
+            else:
+                block_1 = self.get_block(value_1['y'], value_1['x'])
+                if not block_1.is_visible:
+                    self.show_bloc(value_1['y'], value_1['x'])
+                    self.print_grid()
+                    break
+                Message.info("Block déjà visible")
+        while True:
+            value_2 = self.question_coordinate()
+            if not value_2['valid']:
+                Message.warning("Coordonnée non valide")
+            else:
+                block_2 = self.get_block(value_2['y'], value_2['x'])
+                if not block_2.is_visible:
+                    self.show_bloc(value_2['y'], value_2['x'])
+                    self.print_grid()
+                    break
+                Message.info("Block déjà visible")
+        print('\n')
+        if block_2.content != block_1.content:
+            self.hide_bloc(value_1['y'], value_1['x'])
+            self.hide_bloc(value_2['y'], value_2['x'])
+        if self.check_win():
+            Message.win("Bravo ! Tu as gagné !")
+            self.reset_game()
+        self.game()
 
     def print_grid(self):
         print(f"   {' | '.join(self.y_list)}")
-        for x in range(self.grid_size):
-            block_line = [block for block in self.blocks if block.x == (x + 1)]
+        for x in range(1, self.grid_size + 1):
             line = []
-            for block in block_line:
-                content = block.content if block.is_visible else self.config['verso']
+            for y in self.y_list:
+                block_key = f"{x}-{y}"
+                block = self.blocks.get(block_key)
+                content = block.content if block and block.is_visible else self.config['verso']
                 line.append(content)
-            print(f'{x + 1} {"| ".join(line)}')
-        self.question_coordinate()
+            print(f'{x} {"| ".join(line)}')
 
     def question_coordinate(self):
-        while True:
-            print('\n')
-            Message.question("Donnez deux positions !")
-            Message.info("Exemple : A2,B5")
-            coordinate = Message.input().split(",")
-            if len(coordinate) != 2:
-                text = "trop" if len(coordinate) > 2 else "pas assez"
-                Message.warning(f"Il y a {text} de coordonnées !")
-            else:
-                # Vérification coordonnées existantes ?
-                check_1 = self.check_coordinate(coordinate[0])
-                check_2 = self.check_coordinate(coordinate[1])
-                if check_1['valid'] and check_2['valid']:
-                    # Vérification Block n'est pas déjà découvert ?
-                    block_1 = self.get_block(check_1['y'], check_1['x'])
-                    block_2 = self.get_block(check_2['y'], check_2['x'])
-                    if block_1 and block_2:
-                        if not block_1.is_visible and not block_2.is_visible:
-                            if block_1.content == block_2.content:
-                                for block in self.blocks:
-                                    if block.content == block_1.content:
-                                        block.is_visible = True
-                                if self.check_win():
-                                    Message.win("Vous avez gagné !")
-                                    print("\n" * 2)
-                                    self.reset_game()
-                                else:
-                                    self.print_grid()
-                                break
-                            else:
-                                Message.info("Non identique")
-                                self.print_grid()
-                                break
-                        else:
-                            Message.warning("Bloque déjà découvert !")
-
-                    else:
-                        Message.warning("Coordonnées invalides")
-                else:
-                    Message.warning("Coordonnées invalides")
+        print('\n')
+        Message.question("Choix d'une position ?")
+        response = Message.input()
+        coordinate = self.check_coordinate(response)
+        return coordinate
 
     def check_coordinate(self, coordinate: str):
         coordinate = coordinate.strip()
@@ -161,11 +165,17 @@ class Game:
         }
 
     def get_block(self, y: str, x: str) -> BlockModel:
-        block_item = None
-        for block in self.blocks:
-            if block.x == int(x) and block.y == y:
-                block_item = block
-        return block_item
+        return self.blocks.get(f"{x}-{y}")
+
+    def show_bloc(self, y: str, x: str):
+        block = self.blocks.get(f"{x}-{y}")
+        if block:
+            block.is_visible = True
+
+    def hide_bloc(self, y: str, x: str):
+        block = self.blocks.get(f"{x}-{y}")
+        if block:
+            block.is_visible = False
 
     @staticmethod
     def generate_alphabet(n: int):
@@ -173,10 +183,8 @@ class Game:
         return [alphabet[i % 26] for i in range(n)]
 
     def check_win(self):
-        win = False
-        rest_block = [block for block in self.blocks if not block.is_visible]
-        quantity_rest = len(rest_block)
-        return  quantity_rest == 0
+        invisible_blocks_count = sum(1 for block in self.blocks.values() if not block.is_visible)
+        return invisible_blocks_count == 0
 
     def reset_game(self):
         self.name = ""
