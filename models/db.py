@@ -2,7 +2,7 @@ from tinydb import TinyDB, Query
 import os
 
 
-class DbModel(object):
+class DbModel:
     def __init__(self):
         self.db_path = os.path.join("./db.json")
         self.instance = TinyDB(self.db_path)
@@ -15,3 +15,9 @@ class DbModel(object):
 
     def get_all_game(self):
         return self.instance.table('game').all()
+
+    def register_game(self, game):
+        self.instance.table('game').insert(game)
+
+    def register_block(self, block):
+        self.instance.table('block').insert(block)

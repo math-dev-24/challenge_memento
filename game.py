@@ -36,9 +36,28 @@ class Game:
                 if 4 > number > 0:
                     is_n_ok = False
                     if number == 1:
-                        game = self.db.get_all_game()
-                        if game:
-                            print(self.db.get_all_game())
+                        games = self.db.get_all_game()
+                        if games:
+                            game_save = len(games)
+                            for index, game in enumerate(games):
+                                print(f"{index + 1} - Nom de la partie : {game['name']}, Grille : {game['grid_size']} x {game['grid_size']}.")
+                            while True:
+                                Message.question("Choix de la partie à reprendre :")
+                                choice_game = Message.input()
+                                print(game_save, choice_game)
+                                if choice_game.isdigit() and 0 < int(choice_game) <= game_save:
+                                    game_select = games[int(choice_game) - 1]
+                                    self.game_id = game_select['id']
+                                    self.name = game_select['name']
+                                    self.grid_size = int(game_select['grid_size'])
+                                    self.y_list = self.generate_alphabet(self.grid_size)
+                                    blocks = self.db.get_block(self.game_id)
+                                    for block in blocks:
+                                        block_key = f"{block['x']}-{block['y']}"
+                                        self.blocks[block_key] = BlockModel(block['content'], block['is_visible'], block['game_id'], block['x'], block['y'])
+                                    self.game()
+                                else:
+                                    Message.warning("Invalide !")
                         else:
                             Message.info("Aucune(s) sauvegarde(s) disponible(s)")
                             is_n_ok = True
@@ -51,7 +70,7 @@ class Game:
                         Message.info("Bonne journée !")
                         exit()
                 else:
-                    Message.warning(f"Choix {number}, n'est pas 1 ou 2")
+                    Message.warning(f"Choix {number}, n'est pas 1 ou 2 ou 3")
             else:
                 Message.warning("Doit être un nombre !")
 
@@ -62,7 +81,7 @@ class Game:
             cprint('Niveaux disponibles :', attrs=[Format.UNDERLINE, Format.BOLD, Color.MAGENTA])
             for index, grid in enumerate(self.config['level']):
                 Message.msg(f"Niveau {index + 1} : {grid} x {grid}")
-            Message.question("Quelle niveau ?")
+            Message.question("Votre niveau ?")
             choice = Message.input()
             if choice.isdigit():
                 level = int(choice)
@@ -85,17 +104,13 @@ class Game:
     def init_grid(self):
         q_emoji = int((self.grid_size * self.grid_size) / 2)
         random.shuffle(self.config['recto'])
-        emojis = self.config['recto'][:q_emoji]
-        list_emojis = [{'available': 2, 'content': emoji} for emoji in emojis]
-
+        emojis = self.config['recto'][:q_emoji] * 2
+        random.shuffle(emojis)
         for x in range(self.grid_size):
             for y in range(self.grid_size):
-                available_emojis = [emoji_item for emoji_item in list_emojis if emoji_item['available'] > 0]
-                emoji_item = random.choice(available_emojis)
-                current_emoji = emoji_item['content']
-                emoji_item['available'] -= 1
-                block_key = f"{x+1}-{self.y_list[y]}"
-                self.blocks[block_key] = BlockModel(current_emoji, False, self.game_id, x + 1, self.y_list[y])
+                emoji = emojis.pop()
+                block_key = f"{x + 1}-{self.y_list[y]}"
+                self.blocks[block_key] = BlockModel(emoji, False, self.game_id, x + 1, self.y_list[y])
         self.game()
 
     def game(self):
@@ -132,7 +147,7 @@ class Game:
         self.game()
 
     def print_grid(self):
-        print(f"   {' | '.join(self.y_list)}")
+        print(f"   {'  '.join(self.y_list)}")
         for x in range(1, self.grid_size + 1):
             line = []
             for y in self.y_list:
@@ -140,14 +155,16 @@ class Game:
                 block = self.blocks.get(block_key)
                 content = block.content if block and block.is_visible else self.config['verso']
                 line.append(content)
-            print(f'{x} {"| ".join(line)}')
+            print(f'{x}|{" ".join(line)}')
 
     def question_coordinate(self):
         print('\n')
         Message.question("Choix d'une position ?")
+        Message.info("Pour sauvegarder et reprendre plus tard : save")
         response = Message.input()
-        coordinate = self.check_coordinate(response)
-        return coordinate
+        if response != "save":
+            return self.check_coordinate(response)
+        self.go_save_game()
 
     def check_coordinate(self, coordinate: str):
         coordinate = coordinate.strip()
@@ -156,12 +173,14 @@ class Game:
 
         y_in_list = any(y in letter for letter in self.y_list)
         x_is_valid = x.isdigit() and 0 < int(x) <= self.grid_size
+
         is_valid = y_in_list and x_is_valid
 
         return {
+            "check_coordinate": coordinate,
             "valid": is_valid,
             "y": y,
-            "x": x
+            "x": x,
         }
 
     def get_block(self, y: str, x: str) -> BlockModel:
@@ -189,9 +208,16 @@ class Game:
     def reset_game(self):
         self.name = ""
         self.game_id = str(uuid.uuid4())
-        self.blocks = []
+        self.blocks.clear()
         self.y_list = []
         self.init()
 
     def get_game_model(self):
         return GameModel(self.game_id, self.name, self.grid_size)
+
+    def go_save_game(self):
+        self.get_game_model().register()
+        for block in self.blocks.values():
+            block.register()
+        Message.info("Partie sauvegardée !")
+        exit()

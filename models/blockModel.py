@@ -30,3 +30,6 @@ class BlockModel(DbModel):
             'x': self.x,
             'y': self.y
         }
+
+    def register(self):
+        super().register_block(self.get_json())

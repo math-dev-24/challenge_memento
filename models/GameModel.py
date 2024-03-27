@@ -17,3 +17,6 @@ class GameModel(DbModel):
             'name': self.name,
             'grid_size': self.grid_size
         }
+
+    def register(self):
+        super().register_game(self.get_json())
