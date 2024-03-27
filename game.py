@@ -50,33 +50,31 @@ class Game:
                 Message.warning("Doit être un nombre !")
 
     def init_game(self):
-        choice_level: bool = False
-        q_level: int = len(self.config['level'])
-        while not choice_level:
+        q_level = len(self.config['level'])
+        while True:
             print("\n")
             cprint('Niveaux disponibles :', attrs=[Format.UNDERLINE, Format.BOLD, Color.MAGENTA])
             for index, grid in enumerate(self.config['level']):
                 Message.msg(f"Niveau {index + 1} : {grid} x {grid}")
+            Message.question("Quelle niveau ?")
             choice = Message.input()
-
             if choice.isdigit():
                 level = int(choice)
-                if q_level >= level > 0:
-                    choice_level = True
+                if 1 <= level <= q_level:
                     self.grid_size = self.config['level'][level - 1]
                     self.y_list = self.generate_alphabet(self.grid_size)
                     print('\n' * 20)
-                    Message.info(f"Partie initialisé !")
-                    Message.info(f"Nom : {self.name}")
-                    Message.info(f"niveau {level} : {self.grid_size} x {self.grid_size}")
+                    Message.question("Partie initialisée !")
+                    Message.info(f"Nom de la partie : {self.name}")
+                    Message.info(f"Niveau {level} : {self.grid_size} x {self.grid_size}")
                     self.init_grid()
-
+                    break
                 else:
                     print('\n' * 20)
                     Message.warning(f"Le niveau doit être compris entre 1 et {q_level}")
             else:
                 print('\n' * 20)
-                Message.warning('le niveau doit être un nombre !')
+                Message.warning('Le niveau doit être un nombre entier positif !')
 
     def init_grid(self):
         q_emoji = int((self.grid_size * self.grid_size) / 2)
@@ -86,10 +84,10 @@ class Game:
 
         for x in range(self.grid_size):
             for y in range(self.grid_size):
-                list_emojis = [emoji_item for emoji_item in list_emojis if emoji_item['available'] > 0]
-                emoji_number = int(round(random.random() * (len(list_emojis) - 1), 0))
-                current_emoji = list_emojis[emoji_number]['content']
-                list_emojis[emoji_number]['available'] -= 1
+                available_emojis = [emoji_item for emoji_item in list_emojis if emoji_item['available'] > 0]
+                emoji_item = random.choice(available_emojis)
+                current_emoji = emoji_item['content']
+                emoji_item['available'] -= 1
                 block = BlockModel(current_emoji, False, self.game_id, x + 1, self.y_list[y])
                 self.blocks.append(block)
         self.print_grid()
@@ -97,26 +95,72 @@ class Game:
     def print_grid(self):
         print(f"   {' | '.join(self.y_list)}")
         for x in range(self.grid_size):
-            block_line = [block for block in self.blocks if block.x == (x+1)]
+            block_line = [block for block in self.blocks if block.x == (x + 1)]
             line = []
             for block in block_line:
                 content = block.content if block.is_visible else self.config['verso']
                 line.append(content)
             print(f'{x + 1} {"| ".join(line)}')
-        self.question_coor()
+        self.question_coordinate()
 
-    def question_coor(self):
-        is_n_ok = True
-        while is_n_ok:
+    def question_coordinate(self):
+        while True:
             print('\n')
             Message.question("Donnez deux positions !")
             Message.info("Exemple : A2,B5")
             coordinate = Message.input().split(",")
-            is_n_ok = not len(coordinate) == 2
-            if is_n_ok:
-                Message.warning("Positions invalides !")
+            if len(coordinate) != 2:
+                text = "trop" if len(coordinate) > 2 else "pas assez"
+                Message.warning(f"Il y a {text} de coordonnées !")
             else:
-                Message.msg("vérification des coordonées")
+                # Vérification coordonnées existantes ?
+                check_1 = self.check_coordinate(coordinate[0])
+                check_2 = self.check_coordinate(coordinate[1])
+                if check_1['valid'] and check_2['valid']:
+                    # Vérification Block n'est pas déjà découvert ?
+                    block_1 = self.get_block(check_1['y'], check_1['x'])
+                    block_2 = self.get_block(check_2['y'], check_2['x'])
+                    if block_1 and block_2:
+                        if not block_1.is_visible and not block_2.is_visible:
+                            if block_1.content == block_2.content:
+                                for block in self.blocks:
+                                    if block.content == block_1.content:
+                                        block.is_visible = True
+                                self.print_grid()
+                                break
+                            else:
+                                Message.info("Non identique")
+                                self.print_grid()
+                                break
+                        else:
+                            Message.warning("Bloque déjà découvert !")
+
+                    else:
+                        Message.warning("Coordonnées invalides")
+                else:
+                    Message.warning("Coordonnées invalides")
+
+    def check_coordinate(self, coordinate: str):
+        coordinate = coordinate.strip()
+        y = coordinate[0].upper()
+        x = coordinate[1:].strip()
+
+        y_in_list = any(y in letter for letter in self.y_list)
+        x_is_valid = x.isdigit() and 0 < int(x) <= self.grid_size
+        is_valid = y_in_list and x_is_valid
+
+        return {
+            "valid": is_valid,
+            "y": y,
+            "x": x
+        }
+
+    def get_block(self, y: str, x: str) -> BlockModel:
+        block_item = None
+        for block in self.blocks:
+            if block.x == int(x) and block.y == y:
+                block_item = block
+        return block_item
 
     @staticmethod
     def generate_alphabet(n: int):
