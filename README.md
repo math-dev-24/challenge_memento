@@ -51,10 +51,11 @@ Le fichier comprend les informations suivantes:
   - [x] gestion d'erreur bloc disponible ?
   - ...
 - [ ] Sauvegarde
-  - [ ] Enregistrement
+  - [x] Enregistrement
     - [X] Première enregistrement
-    - [ ] Re engistrement
+    - [X] Re engistrement
   - [X] Récupération d'une partie sauvegardée
+  - [ ] Suppression des données si la partie est terminée
 
 
 

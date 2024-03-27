@@ -18,6 +18,7 @@ class Game:
         self.gameModel = None
         self.grid_size: int = 0
         self.y_list = []
+        self.save = False
 
     def init(self):
         print('\n')
@@ -51,6 +52,7 @@ class Game:
                                     self.name = game_select['name']
                                     self.grid_size = int(game_select['grid_size'])
                                     self.y_list = self.generate_alphabet(self.grid_size)
+                                    self.save = True
                                     blocks = self.db.get_block(self.game_id)
                                     for block in blocks:
                                         block_key = f"{block['x']}-{block['y']}"
@@ -216,8 +218,11 @@ class Game:
         return GameModel(self.game_id, self.name, self.grid_size)
 
     def go_save_game(self):
-        self.get_game_model().register()
+        if not self.save:
+            self.get_game_model().register()
+            for block in self.blocks.values():
+                block.register()
         for block in self.blocks.values():
-            block.register()
+            block.update()
         Message.info("Partie sauvegardée !")
         exit()

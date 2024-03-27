@@ -17,7 +17,13 @@ class DbModel:
         return self.instance.table('game').all()
 
     def register_game(self, game):
-        self.instance.table('game').insert(game)
+        self.instance.table('game').insert(game.get_json())
 
     def register_block(self, block):
-        self.instance.table('block').insert(block)
+        self.instance.table('block').insert(block.get_json())
+
+    def update_block(self, block):
+        self.instance.table('block').update(
+            {'is_visible': block.is_visible},
+            (Query().x == block.x) & (Query().y == block.y) & (Query().game_id == block.game_id)
+        )

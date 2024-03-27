@@ -32,4 +32,7 @@ class BlockModel(DbModel):
         }
 
     def register(self):
-        super().register_block(self.get_json())
+        super().register_block(self)
+
+    def update(self):
+        super().update_block(self)

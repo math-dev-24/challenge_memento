@@ -19,4 +19,4 @@ class GameModel(DbModel):
         }
 
     def register(self):
-        super().register_game(self.get_json())
+        super().register_game(self)
