@@ -207,6 +207,8 @@ class Game:
         return invisible_blocks_count == 0
 
     def reset_game(self):
+        if self.save:
+            self.db.delete_game(self.game_id)
         self.name = ""
         self.game_id = str(uuid.uuid4())
         self.blocks.clear()

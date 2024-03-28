@@ -50,12 +50,12 @@ Le fichier comprend les informations suivantes:
   - [x] gestion d'erreur des coordonnées
   - [x] gestion d'erreur bloc disponible ?
   - ...
-- [ ] Sauvegarde
+- [X] Sauvegarde
   - [x] Enregistrement
     - [X] Première enregistrement
     - [X] Re engistrement
   - [X] Récupération d'une partie sauvegardée
-  - [ ] Suppression des données si la partie est terminée
+  - [X] Suppression des données si la partie est terminée
 
 
 

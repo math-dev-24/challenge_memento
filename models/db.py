@@ -27,3 +27,7 @@ class DbModel:
             {'is_visible': block.is_visible},
             (Query().x == block.x) & (Query().y == block.y) & (Query().game_id == block.game_id)
         )
+
+    def delete_game(self, game_id: str):
+        self.instance.table('block').remove(Query().game_id == game_id)
+        self.instance.table('game').remove(Query().id == game_id)
