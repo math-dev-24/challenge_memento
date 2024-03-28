@@ -41,7 +41,8 @@ class Game:
                         if games:
                             game_save = len(games)
                             for index, game in enumerate(games):
-                                print(f"{index + 1} - Nom de la partie : {game['name']}, Grille : {game['grid_size']} x {game['grid_size']}.")
+                                print(
+                                    f"{index + 1} - Nom de la partie : {game['name']}, Grille : {game['grid_size']} x {game['grid_size']}.")
                             while True:
                                 Message.question("Choix de la partie à reprendre :")
                                 choice_game = Message.input()
@@ -55,7 +56,8 @@ class Game:
                                     blocks = self.db.get_block(self.game_id)
                                     for block in blocks:
                                         block_key = f"{block['x']}-{block['y']}"
-                                        self.blocks[block_key] = BlockModel(block['content'], block['is_visible'], block['game_id'], block['x'], block['y'])
+                                        self.blocks[block_key] = BlockModel(block['content'], block['is_visible'],
+                                                                            block['game_id'], block['x'], block['y'])
                                     self.game()
                                 else:
                                     Message.warning("Invalide !")
@@ -115,30 +117,14 @@ class Game:
         self.game()
 
     def game(self):
+        # print grid
         self.print_grid()
-        while True:
-            value_1 = self.question_coordinate()
-            if not value_1['valid']:
-                Message.warning("Coordonnée non valide")
-            else:
-                block_1 = self.get_block(value_1['y'], value_1['x'])
-                if not block_1.is_visible:
-                    self.show_bloc(value_1['y'], value_1['x'])
-                    self.print_grid()
-                    break
-                Message.info("Block déjà visible")
-        while True:
-            value_2 = self.question_coordinate()
-            if not value_2['valid']:
-                Message.warning("Coordonnée non valide")
-            else:
-                block_2 = self.get_block(value_2['y'], value_2['x'])
-                if not block_2.is_visible:
-                    self.show_bloc(value_2['y'], value_2['x'])
-                    self.print_grid()
-                    break
-                Message.info("Block déjà visible")
-        print('\n')
+        item_1 = self.question_coordinate()
+        item_2 = self.question_coordinate()
+        block_1 = item_1['block']
+        block_2 = item_2['block']
+        value_1 = item_1['value']
+        value_2 = item_2['value']
         if block_2.content != block_1.content:
             self.hide_bloc(value_1['y'], value_1['x'])
             self.hide_bloc(value_2['y'], value_2['x'])
@@ -159,13 +145,27 @@ class Game:
             print(f'{x}|{" ".join(line)}')
 
     def question_coordinate(self):
-        print('\n')
-        Message.question("Choix d'une position ?")
-        Message.info("Pour sauvegarder et reprendre plus tard : save")
-        response = Message.input()
-        if response != "save":
-            return self.check_coordinate(response)
-        self.go_save_game()
+        while True:
+            print('\n')
+            Message.question("Rentrez une position ")
+            Message.info("Pour sauvegarder et reprendre plus tard : save")
+            response = Message.input()
+            if response.strip() == "save":
+                self.go_save_game()
+
+            value = self.check_coordinate(response)
+            if not value['valid']:
+                Message.warning("Coordonnée non valide")
+            else:
+                block = self.get_block(value['y'], value['x'])
+                if not block.is_visible:
+                    self.show_bloc(value['y'], value['x'])
+                    self.print_grid()
+                    return {
+                        'block': block,
+                        "value": value,
+                    }
+                Message.info("Block déjà visible")
 
     def check_coordinate(self, coordinate: str):
         coordinate = coordinate.strip()
@@ -178,7 +178,7 @@ class Game:
         is_valid = y_in_list and x_is_valid
 
         return {
-            "check_coordinate": coordinate,
+            "coordinate": coordinate,
             "valid": is_valid,
             "y": y,
             "x": x,
@@ -211,6 +211,7 @@ class Game:
         self.game_id = str(uuid.uuid4())
         self.blocks.clear()
         self.y_list = []
+        self.save = False
         self.init()
 
     def get_game_model(self):
