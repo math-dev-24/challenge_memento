@@ -27,7 +27,7 @@ class Game:
         while is_n_ok:
             print("\n")
             Message.question("Que souhaitez vous faire ?")
-            Message.msg("1 - Reprendre une partie sauvegardé")
+            Message.msg("1 - Reprendre une partie sauvegardée")
             Message.msg("2 - Nouvelle partie")
             Message.msg("3 - Quitter")
             value = Message.input()
@@ -40,6 +40,7 @@ class Game:
                         games = self.db.get_all_game()
                         if games:
                             game_save = len(games)
+                            Message.info("Partie(s) sauvegardée(s) :")
                             for index, game in enumerate(games):
                                 print(
                                     f"{index + 1} - Nom de la partie : {game['name']}, Grille : {game['grid_size']} x {game['grid_size']}.")
@@ -73,7 +74,7 @@ class Game:
                         Message.info("Bonne journée !")
                         exit()
                 else:
-                    Message.warning(f"Choix {number}, n'est pas 1 ou 2 ou 3")
+                    Message.warning(f"Votre choix : {number}, n'est pas 1 ou 2 ou 3")
             else:
                 Message.warning("Doit être un nombre !")
 
@@ -147,7 +148,7 @@ class Game:
     def question_coordinate(self):
         while True:
             print('\n')
-            Message.question("Rentrez une position ")
+            Message.question("Entrée une position !")
             Message.info("Pour sauvegarder et reprendre plus tard : save")
             response = Message.input()
             if response.strip() == "save":
